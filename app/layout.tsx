@@ -8,7 +8,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Studio Lumin | 사진 스튜디오",
+  title: "Bonobo Studio | 사진 스튜디오",
   description: "웨딩, 프로필, 가족사진, 스냅 전문 사진 스튜디오 - 당신의 소중한 순간을 빛으로 담습니다",
 }
 
