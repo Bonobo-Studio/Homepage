@@ -166,18 +166,18 @@ export default function AdminDashboard() {
       return
     }
 
-    const newId = Math.max(...items.map((i) => i.id), 0) + 1
-    const updatedItems = [...items, { ...newItem, id: newId }]
-    setItems(updatedItems)
-    localStorage.setItem("portfolioItems", JSON.stringify(updatedItems))
+    // const newId = Math.max(...items.map((i) => i.id), 0) + 1
+    // const updatedItems = [...items, { ...newItem, id: newId }]
+    // setItems(updatedItems)
+    // localStorage.setItem("portfolioItems", JSON.stringify(updatedItems))
 
-    // Reset form
-    setNewItem({ title: "", category: "wedding", image: "" })
-    setPreviewUrl("")
-    setIsAdding(false)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
+    // // Reset form
+    // setNewItem({ title: "", category: "wedding", image: "" })
+    // setPreviewUrl("")
+    // setIsAdding(false)
+    // if (fileInputRef.current) {
+    //   fileInputRef.current.value = ""
+    // }
   }
 
   const handleDeleteItem = (id: number) => {
