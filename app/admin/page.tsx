@@ -1,7 +1,6 @@
-import type React from "react"
-
 import { AdminLogin } from "@/components/admin/admin-login"
-import { authAdmin } from "@/lib/auth"
+import { authAdmin, checkCacheAdminAuth } from "@/lib/auth"
+import { redirect } from "next/navigation";
 
 async function handleLoginAction(password: string) {
   "use server"
@@ -15,6 +14,12 @@ async function handleLoginAction(password: string) {
   }
 }
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage() {
+  const isAuth = await checkCacheAdminAuth();
+
+  if(isAuth) {
+    redirect("/admin/dashboard");
+  }
+
   return <AdminLogin handleLogin={handleLoginAction} />
 }

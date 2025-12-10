@@ -1,0 +1,45 @@
+import { NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabaseServer";
+
+export async function POST(req: Request) {
+    const form = await req.formData();
+    const file = form.get("file") as File;
+
+    if (!file) {
+        return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+    }
+
+    const path = `${file.name}`;
+
+    // Supabase Storage 업로드
+    const { error: uploadErr } = await supabaseServer.storage
+        .from("images")
+        .upload(path, file, {
+            contentType: file.type,
+            upsert: false,
+        });
+
+    if (uploadErr) {
+        return NextResponse.json({ error: uploadErr.message }, { status: 500 });
+    }
+
+    // Public URL 생성
+    const { data: urlData } = supabaseServer.storage
+        .from("images")
+        .getPublicUrl(path);
+
+    // DB Insert
+    const { error: dbErr, data } = await supabaseServer
+        .from("images")
+        .insert({
+            image: urlData.publicUrl,
+        })
+        .select()
+        .single();
+
+    if (dbErr) {
+        return NextResponse.json({ error: dbErr.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ item: data });
+}

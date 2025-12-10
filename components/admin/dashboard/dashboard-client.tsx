@@ -7,7 +7,12 @@ import UploadBoard from "./upload-board"
 import Header from "./header"
 import { GallaryBoard, PortfolioItem } from "./gallary-board"
 
-export default function DashboardClient() {
+type LogoutResult = {
+  success: boolean
+  error?: string
+}
+
+export default function DashboardClient({handleLogout}: {handleLogout: () => Promise<LogoutResult>}) {
   const router = useRouter()
   const [items, setItems] = useState<PortfolioItem[]>([])
 
@@ -72,11 +77,6 @@ export default function DashboardClient() {
       localStorage.setItem("portfolioItems", JSON.stringify(defaultItems))
     }
   }, [router])
-
-  const handleLogout = async () => {
-    await fetch("/api/auth", { method: "DELETE" })
-    router.push("/admin")
-  }
 
   const handleDeleteItem = (id: number) => {
     if (confirm("정말 삭제하시겠습니까?")) {

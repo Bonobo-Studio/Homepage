@@ -7,16 +7,11 @@ import { useRef, useState } from "react"
 
 export default function UploadBoard() {
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [newItem, setNewItem] = useState({
+        file: null as File | null
+    })
     const [isAdding, setIsAdding] = useState(false)
-    const [previewUrl, setPreviewUrl] = useState<string>("")
     const [isDragging, setIsDragging] = useState(false)
-
-    const categories = [
-        { id: "wedding", name: "웨딩" },
-        { id: "profile", name: "프로필" },
-        { id: "family", name: "가족사진" },
-        { id: "snap", name: "스냅" },
-    ]
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -25,28 +20,32 @@ export default function UploadBoard() {
         }
     }
 
-    const handleAddItem = () => {
-        // if (!newItem.title || !newItem.image) {
-        //   alert("제목과 이미지를 모두 입력해주세요")
-        //   return
-        // }
+    const handleAddItem = async () => {
+        if(!newItem.file) {
+            alert("파일과 카테고리를 모두 입력해주세요")
+            return
+        }
 
-        // const newId = Math.max(...items.map((i) => i.id), 0) + 1
-        // const updatedItems = [...items, { ...newItem, id: newId }]
-        // setItems(updatedItems)
-        // localStorage.setItem("portfolioItems", JSON.stringify(updatedItems))
+        const form = new FormData()
+        form.append("file", newItem.file)
+        
+        const res = await fetch("/admin/dashboard/upload", {
+            method: "POST",
+            body: form,
+        })
 
-        // // Reset form
-        // setNewItem({ title: "", category: "wedding", image: "" })
-        // setPreviewUrl("")
-        // setIsAdding(false)
-        // if (fileInputRef.current) {
-        //   fileInputRef.current.value = ""
-        // }
+        const data = await res.json()
+
+        // Reset form
+        setNewItem({ file: null })
+        setIsAdding(false)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
     }
 
     const handleRemoveImage = () => {
-        setPreviewUrl("")
+        setNewItem({ ...newItem, file: null })
         if (fileInputRef.current) {
             fileInputRef.current.value = ""
         }
@@ -79,15 +78,14 @@ export default function UploadBoard() {
 
         const reader = new FileReader()
         reader.onload = (e) => {
-            const base64 = e.target?.result as string
-            setPreviewUrl(file.name)
+            setNewItem({ ...newItem, file: file })
         }
-        reader.readAsDataURL(file)
+        reader.readAsArrayBuffer(file)
     }
 
     return (
         <Card className="p-6 mb-8">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-light">새 이미지 추가</h2>
                 <Button onClick={() => setIsAdding(!isAdding)} size="sm" variant="outline">
                     {isAdding ? ("취소") : (
@@ -99,33 +97,14 @@ export default function UploadBoard() {
                 </Button>
             </div>
             {isAdding && (
-                <div className="pt-4 space-y-4 border-t border-border">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="title">제목</Label>
-                            <Input id="title" placeholder="작품 제목" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="category">카테고리</Label>
-                            <select
-                                id="category"
-                                className="px-3 w-full h-10 rounded-md border border-input bg-background text-foreground"
-                            >
-                                {categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+                <div className="pt-4 space-y-4 border-border">
                     <div className="space-y-2">
                         <Label>이미지 업로드</Label>
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                        {previewUrl ? (
+                        {newItem.file ? (
                             <div className="flex gap-2 items-center w-full max-w-xs">
                                 <div className="mb-1 text-sm text-left truncate text-muted-foreground">
-                                    {previewUrl}
+                                    {newItem.file?.name}
                                 </div>
                                 <Button
                                     variant="destructive"
@@ -155,8 +134,8 @@ export default function UploadBoard() {
                             </div>
                         )}
                     </div>
-                    <Button>
-                        저장
+                    <Button onClick={handleAddItem}>
+                        업로드
                     </Button>
                 </div>
             )}
