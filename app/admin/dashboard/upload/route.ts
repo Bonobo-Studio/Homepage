@@ -13,26 +13,27 @@ export async function POST(req: Request) {
 
     // Supabase Storage 업로드
     const { error: uploadErr } = await supabaseServer.storage
-        .from("images")
+        .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
         .upload(path, file, {
             contentType: file.type,
-            upsert: false,
+            upsert: true,
         });
 
     if (uploadErr) {
+        console.error("[admin upload] error:", uploadErr.message)
         return NextResponse.json({ error: uploadErr.message }, { status: 500 });
     }
 
     // Public URL 생성
     const { data: urlData } = supabaseServer.storage
-        .from("images")
+        .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
         .getPublicUrl(path);
 
     // DB Insert
     const { error: dbErr, data } = await supabaseServer
-        .from("images")
+        .from(process.env.NEXT_PUBLIC_DB_TABLE!)
         .insert({
-            image: urlData.publicUrl,
+            image: file.name,
         })
         .select()
         .single();
