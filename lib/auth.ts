@@ -16,7 +16,12 @@ export const deleteCacheAdminAuth = async () => {
 }
 
 export const authAdmin = async (password: string) => {
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    let adminPassword = process.env.ADMIN_PASSWORD;
+    const isDev = process.env.NODE_ENV === "development";
+
+    if(isDev) {
+        adminPassword = "admin123";
+    }
 
     if(password === adminPassword) {
         (await cookies()).set("admin_auth", "true", {
