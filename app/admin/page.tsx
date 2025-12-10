@@ -1,30 +1,20 @@
-"use client"
-
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { AdminLogin } from "@/components/admin/admin-login"
+import { authAdmin } from "@/lib/auth"
+
+async function handleLoginAction(password: string) {
+  "use server"
+
+  const response = await authAdmin(password);
+
+  if(response.ok) {
+    return { success: true, redirect: "/admin/dashboard" };
+  } else {
+    return { success: false, error: "비밀번호가 올바르지 않습니다" };
+  }
+}
 
 export default function AdminLoginPage() {
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const router = useRouter()
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Simple password check (in production, use proper authentication)
-    if (password === "admin123") {
-      localStorage.setItem("adminAuth", "true")
-      router.push("/admin/dashboard")
-    } else {
-      setError("비밀번호가 올바르지 않습니다")
-    }
-  }
-
-  return <AdminLogin 
-    password={password} 
-    error={error} 
-    onPasswordChange={(e) => setPassword(e.target.value) } 
-    handleLogin={handleLogin} />
+  return <AdminLogin handleLogin={handleLoginAction} />
 }
