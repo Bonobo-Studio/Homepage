@@ -1,6 +1,6 @@
 import { checkCacheAdminAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import DashboardClient from "./dashboard-client";
+import DashboardClient from "@/components/admin/dashboard/dashboard-client";
 
 export default async function AdminDashboard() {
   const isAuth = await checkCacheAdminAuth();
