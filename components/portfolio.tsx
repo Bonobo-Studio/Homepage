@@ -1,14 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 
 const categories = [
-  { id: "all", name: "전체" },
-  { id: "wedding", name: "웨딩" },
-  { id: "profile", name: "프로필" },
-  { id: "family", name: "가족사진" },
-  { id: "snap", name: "스냅" },
+  { id: "photo", name: "사진" },
+  { id: "video", name: "동영상" },
 ]
 
 const defaultItems = [
@@ -63,55 +60,71 @@ const defaultItems = [
 ]
 
 export function Portfolio() {
-  const [activeCategory, setActiveCategory] = useState("all")
+  const [activeCategory, setActiveCategory] = useState("photo")
   const [portfolioItems, setPortfolioItems] = useState<
     Array<{ id: number; category: string; title: string; image: string }>
   >([])
+  const [displayStartIndex, setDisplayStartIndex] = useState(0)
+  const maxVisibleItems = 5
+
+  // 보여줄 아이템 계산 (순환)
+  const visibleItems = useMemo(() => {
+    if (portfolioItems.length <= maxVisibleItems) return portfolioItems
+    const items: typeof portfolioItems = []
+    for (let i = 0; i < maxVisibleItems; i += 1) {
+      // 배열 끝에 닿으면 앞에서 다시 가져오기
+      const wrappedIndex = (displayStartIndex + i) % portfolioItems.length
+      items.push(portfolioItems[wrappedIndex])
+    }
+    return items
+  }, [portfolioItems, displayStartIndex])
 
   useEffect(() => {
-    // Load items from localStorage
-    const stored = localStorage.getItem("portfolioItems")
-    if (stored) {
-      setPortfolioItems(JSON.parse(stored))
-    } else {
-      setPortfolioItems(defaultItems)
-      localStorage.setItem("portfolioItems", JSON.stringify(defaultItems))
-    }
-
-    // Listen for storage changes (when admin updates)
-    const handleStorageChange = () => {
-      const updated = localStorage.getItem("portfolioItems")
-      if (updated) {
-        setPortfolioItems(JSON.parse(updated))
-      }
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-    return () => window.removeEventListener("storage", handleStorageChange)
+    setPortfolioItems(defaultItems)
   }, [])
 
-  const filteredItems =
-    activeCategory === "all" ? portfolioItems : portfolioItems.filter((item) => item.category === activeCategory)
+  // 자동 스크롤 useEffect 추가
+  useEffect(() => {
+    // 아이템이 5개 이하이면 자동 스크롤 불필요
+    if (portfolioItems.length <= maxVisibleItems) return
+    const intervalId = window.setInterval(() => {
+      setDisplayStartIndex((prev) => (prev + maxVisibleItems) % portfolioItems.length)
+    }, 4000) // 4초마다 다음 세트로 이동
+    return () => window.clearInterval(intervalId)
+  }, [portfolioItems])
+
+  // 버튼 핸들러
+  const handlePrev = () => {
+    if (portfolioItems.length === 0) return
+    setDisplayStartIndex((prev) => {
+      const nextIndex = (prev - maxVisibleItems) % portfolioItems.length
+      return nextIndex < 0 ? nextIndex + portfolioItems.length : nextIndex
+    })
+  }
+
+  const handleNext = () => {
+    if (portfolioItems.length === 0) return
+    setDisplayStartIndex((prev) => (prev + maxVisibleItems) % portfolioItems.length)
+  }
 
   return (
-    <section id="portfolio" className="py-24 px-6 bg-secondary">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+    <section id="portfolio" className="px-6 py-24 bg-secondary">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-16 text-center">
           <p className="text-sm tracking-[0.2em] text-muted-foreground uppercase mb-3">Portfolio</p>
-          <h2 className="text-3xl md:text-4xl font-light text-foreground">작품 갤러리</h2>
+          <h2 className="text-3xl font-light md:text-4xl text-foreground">작품 갤러리</h2>
         </div>
 
         {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap gap-4 justify-center mb-12">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
-              className={`px-6 py-2 text-sm transition-all ${
-                activeCategory === category.id
-                  ? "bg-foreground text-background"
-                  : "bg-transparent text-muted-foreground hover:text-foreground border border-border"
-              }`}
+              className={`px-6 py-2 text-sm transition-all ${activeCategory === category.id
+                ? "bg-foreground text-background"
+                : "bg-transparent text-muted-foreground hover:text-foreground border border-border"
+                }`}
             >
               {category.name}
             </button>
@@ -119,22 +132,42 @@ export function Portfolio() {
         </div>
 
         {/* Portfolio Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {filteredItems.map((item) => (
-            <div key={item.id} className="group relative aspect-[3/4] overflow-hidden cursor-pointer">
-              <Image
-                src={item.image || "/placeholder.svg"}
-                alt={item.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-all duration-300 flex items-center justify-center">
-                <p className="text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-lg font-light">
-                  {item.title}
-                </p>
+        <div className="relative">
+          <div className="grid grid-rows-1 grid-flow-col auto-cols-[minmax(0,1fr)] gap-4 overflow-hidden">
+            {visibleItems.map((item) => (
+              <div key={item.id} className="group relative aspect-[3/4] overflow-hidden cursor-pointer">
+                <Image
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="flex absolute inset-0 justify-center items-center transition-all duration-300 bg-foreground/0 group-hover:bg-foreground/40">
+                  <p className="text-lg font-light opacity-0 transition-opacity duration-300 text-primary-foreground group-hover:opacity-100">
+                    {item.title}
+                  </p>
+                </div>
               </div>
+            ))}
+          </div>
+          {portfolioItems.length > maxVisibleItems && (
+            <div className="flex gap-3 justify-center items-center mt-4">
+              <button
+                onClick={handlePrev}
+                aria-label="이전 항목"
+                className="h-10 min-w-[2.5rem] px-3 rounded-full border border-border bg-background/90 text-foreground shadow transition hover:bg-foreground hover:text-background active:scale-95 sm:h-11 sm:px-4"
+              >
+                <span aria-hidden="true" className="text-lg leading-none">‹</span>
+              </button>
+              <button
+                onClick={handleNext}
+                aria-label="다음 항목"
+                className="h-10 min-w-[2.5rem] px-3 rounded-full border border-border bg-background/90 text-foreground shadow transition hover:bg-foreground hover:text-background active:scale-95 sm:h-11 sm:px-4"
+              >
+                <span aria-hidden="true" className="text-lg leading-none">›</span>
+              </button>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </section>
