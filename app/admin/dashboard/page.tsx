@@ -1,6 +1,7 @@
 import { checkCacheAdminAuth, deleteCacheAdminAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import DashboardClient from "@/components/admin/dashboard/dashboard-client";
+import Header from "@/components/admin/dashboard/header";
+import { AdminDashboardClient } from "./admin-dashboard-client";
 
 type LogoutResult = {
   success: boolean
@@ -9,6 +10,7 @@ type LogoutResult = {
 
 async function handleLogoutAction(): Promise<LogoutResult> {
   "use server"
+
   try {
     await deleteCacheAdminAuth()
     return { success: true }
@@ -18,11 +20,19 @@ async function handleLogoutAction(): Promise<LogoutResult> {
 }
 
 export default async function AdminDashboard() {
-  const isAuth = await checkCacheAdminAuth();
+  const isAuth = await checkCacheAdminAuth()
 
   if (!isAuth) {
     redirect("/admin");
   }
 
-  return <DashboardClient handleLogout={handleLogoutAction} />;
+  return (
+    <div className="min-h-screen bg-background">
+      <Header
+        handleLogout={handleLogoutAction} />
+      <div className="px-6 py-8 mx-auto max-w-7xl">
+        <AdminDashboardClient />
+      </div>
+    </div>
+  )
 }

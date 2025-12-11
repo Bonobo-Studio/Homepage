@@ -1,11 +1,12 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, Upload, X } from "lucide-react"
 import { useRef, useState } from "react"
 
-export default function UploadBoard() {
+export default function UploadBoard({ onUploadSuccess }: { onUploadSuccess?: () => void }) {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [newItem, setNewItem] = useState({
         file: null as File | null
@@ -29,12 +30,14 @@ export default function UploadBoard() {
         const form = new FormData()
         form.append("file", newItem.file)
         
-        const res = await fetch("/admin/dashboard/upload", {
+        const response = await fetch("/admin/dashboard/upload", {
             method: "POST",
             body: form,
         })
 
-        const data = await res.json()
+        if (!response.ok) {
+            throw new Error("업로드 중 오류가 발생했습니다")
+        }
 
         // Reset form
         setNewItem({ file: null })
@@ -42,6 +45,9 @@ export default function UploadBoard() {
         if (fileInputRef.current) {
           fileInputRef.current.value = ""
         }
+
+        // 갤러리 새로고침 콜백 호출
+        onUploadSuccess?.()
     }
 
     const handleRemoveImage = () => {

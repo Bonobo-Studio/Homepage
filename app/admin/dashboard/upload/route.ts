@@ -33,7 +33,8 @@ export async function POST(req: Request) {
     const { error: dbErr, data } = await supabaseServer
         .from(process.env.NEXT_PUBLIC_DB_TABLE!)
         .insert({
-            image: file.name,
+            image: urlData.publicUrl,
+            title: file.name,
         })
         .select()
         .single();
