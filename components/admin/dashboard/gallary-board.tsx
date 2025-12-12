@@ -5,13 +5,13 @@ import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 
-export interface PortfolioItem {
+export interface PhotoItem {
     id: number
-    image: string
+    url: string
 }
 
 export function GallaryBoard({ refreshKey }: { refreshKey: number }) {
-    const [items, setItems] = useState<PortfolioItem[]>([])
+    const [items, setItems] = useState<PhotoItem[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set())
@@ -115,7 +115,7 @@ export function GallaryBoard({ refreshKey }: { refreshKey: number }) {
                             <Card key={item.id} className="overflow-hidden">
                                 <div className="aspect-[3/4] relative">
                                     <img
-                                        src={item.image || "/placeholder.svg"}
+                                        src={item.url || "/placeholder.svg"}
                                         className="object-cover w-full h-full"
                                     />
                                 </div>

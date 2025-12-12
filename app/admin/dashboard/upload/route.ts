@@ -31,10 +31,11 @@ export async function POST(req: Request) {
 
     // DB Insert
     const { error: dbErr, data } = await supabaseServer
-        .from(process.env.NEXT_PUBLIC_DB_TABLE!)
+        .from(process.env.NEXT_PUBLIC_DB_PHOTOS_TABLE!)
         .insert({
-            image: urlData.publicUrl,
             title: file.name,
+            storage_path: path,
+            url: urlData.publicUrl,
         })
         .select()
         .single();

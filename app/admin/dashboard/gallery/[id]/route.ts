@@ -1,6 +1,3 @@
-// 파일 경로: app/admin/dashboard/gallery/[id]/route.ts
-// URL 경로: /admin/dashboard/gallery/123 (id는 123)
-
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
@@ -11,7 +8,7 @@ export async function DELETE(
     try {
         const { id } = await params
         const { error, data } = await supabaseServer
-            .from(process.env.NEXT_PUBLIC_DB_TABLE!)
+            .from(process.env.NEXT_PUBLIC_DB_PHOTOS_TABLE!)
             .select()
             .eq("id", id)
             .single()
@@ -25,7 +22,7 @@ export async function DELETE(
         else {
             const { error: deleteErr } = await supabaseServer.storage
                 .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
-                .remove([data?.title])
+                .remove([data.storage_path])
 
             if (deleteErr) {
                 return NextResponse.json(
@@ -35,7 +32,7 @@ export async function DELETE(
             }
 
             const { error: dbDeleteErr } = await supabaseServer
-                .from(process.env.NEXT_PUBLIC_DB_TABLE!)
+                .from(process.env.NEXT_PUBLIC_DB_PHOTOS_TABLE!)
                 .delete()
                 .eq("id", id)
 
