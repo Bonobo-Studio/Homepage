@@ -4,7 +4,7 @@ import { supabaseServer } from "@/lib/supabaseServer";
 export async function GET() {
     try {
         const { data, error } = await supabaseServer
-            .from(process.env.NEXT_PUBLIC_DB_VIDEOS_TABLE!)
+            .from(process.env.DB_VIDEOS_TABLE!)
             .select("*")
             .eq("is_active", true)
             .order("created_at", { ascending: false });

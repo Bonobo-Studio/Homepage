@@ -8,7 +8,7 @@ import { KakaoButton } from "@/components/kakao-button"
 import { supabaseServer } from "@/lib/supabaseServer"
 
 async function getHeroItems() {
-  const bucketName = process.env.NEXT_PUBLIC_STORAGE_BUCKET!
+  const bucketName = process.env.STORAGE_BUCKET!
   const targetFolder = "home"
 
   const { data: fileList, error: listError } = await supabaseServer.storage

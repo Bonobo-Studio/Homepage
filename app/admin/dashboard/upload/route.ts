@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     // Supabase Storage 업로드
     const { error: uploadErr } = await supabaseServer.storage
-        .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
+        .from(process.env.STORAGE_BUCKET!)
         .upload(path, file, {
             contentType: file.type,
             upsert: true,
@@ -26,12 +26,12 @@ export async function POST(req: Request) {
 
     // Public URL 생성
     const { data: urlData } = supabaseServer.storage
-        .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
+        .from(process.env.STORAGE_BUCKET!)
         .getPublicUrl(path);
 
     // DB Insert
     const { error: dbErr, data } = await supabaseServer
-        .from(process.env.NEXT_PUBLIC_DB_PHOTOS_TABLE!)
+        .from(process.env.DB_PHOTOS_TABLE!)
         .insert({
             title: file.name,
             storage_path: path,
