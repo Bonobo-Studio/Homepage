@@ -8,7 +8,7 @@ export async function DELETE(
     try {
         const { id } = await params
         const { error, data } = await supabaseServer
-            .from(process.env.NEXT_PUBLIC_DB_PHOTOS_TABLE!)
+            .from(process.env.DB_PHOTOS_TABLE!)
             .select()
             .eq("id", id)
             .single()
@@ -21,7 +21,7 @@ export async function DELETE(
         }
         else {
             const { error: deleteErr } = await supabaseServer.storage
-                .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
+                .from(process.env.STORAGE_BUCKET!)
                 .remove([data.storage_path])
 
             if (deleteErr) {
@@ -32,7 +32,7 @@ export async function DELETE(
             }
 
             const { error: dbDeleteErr } = await supabaseServer
-                .from(process.env.NEXT_PUBLIC_DB_PHOTOS_TABLE!)
+                .from(process.env.DB_PHOTOS_TABLE!)
                 .delete()
                 .eq("id", id)
 
