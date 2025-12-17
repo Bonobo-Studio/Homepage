@@ -1,8 +1,32 @@
+import type { Metadata } from "next"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { KakaoButton } from "@/components/kakao-button"
 import { Car, MapPin, Clock, Users, Star, CheckCircle, Utensils, Camera } from "lucide-react"
 import Link from "next/link"
+
+// 페이지별 SEO 메타데이터
+export const metadata: Metadata = {
+  title: "후쿠오카 프라이빗 투어",
+  description:
+    "후쿠오카 프라이빗 투어 서비스. 전용 차량과 한국어 가이드로 편하게 다자이후, 유후인, 이토시마를 여행하세요. 맛집 예약 대행과 스냅 촬영 포함.",
+  keywords: [
+    "후쿠오카 프라이빗 투어",
+    "후쿠오카 개인 투어",
+    "후쿠오카 한국어 가이드",
+    "다자이후 투어",
+    "유후인 당일치기",
+    "이토시마 투어",
+    "야나가와 뱃놀이",
+    "후쿠오카 맛집 투어",
+  ],
+  openGraph: {
+    title: "후쿠오카 프라이빗 투어 | Bonobo Studio",
+    description:
+      "전용 차량과 한국어 가이드로 편하게 후쿠오카를 여행하세요. 맛집 예약과 스냅 촬영 포함.",
+    images: ["/og-tour.jpg"],
+  },
+}
 
 // 투어 패키지 정보
 const packages = [

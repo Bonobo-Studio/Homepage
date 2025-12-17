@@ -1,8 +1,32 @@
+import type { Metadata } from "next"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { KakaoButton } from "@/components/kakao-button"
 import { Camera, MapPin, Clock, Heart, Star, CheckCircle, Image } from "lucide-react"
 import Link from "next/link"
+
+// 페이지별 SEO 메타데이터
+export const metadata: Metadata = {
+  title: "후쿠오카 스냅촬영",
+  description:
+    "후쿠오카 전문 스냅촬영 서비스. 오호리공원, 다자이후, 이토시마 등 인기 촬영지에서 자연스럽고 감성적인 순간을 담아드립니다. 커플스냅, 가족사진, 우정스냅 전문.",
+  keywords: [
+    "후쿠오카 스냅",
+    "후쿠오카 스냅촬영",
+    "후쿠오카 커플스냅",
+    "후쿠오카 가족사진",
+    "다자이후 스냅",
+    "이토시마 스냅",
+    "오호리공원 스냅",
+    "일본 스냅촬영",
+  ],
+  openGraph: {
+    title: "후쿠오카 스냅촬영 | Bonobo Studio",
+    description:
+      "후쿠오카 전문 스냅촬영. 인기 촬영지에서 자연스럽고 감성적인 순간을 담아드립니다.",
+    images: ["/og-snap.jpg"],
+  },
+}
 
 // 촬영 패키지 정보
 const packages = [
