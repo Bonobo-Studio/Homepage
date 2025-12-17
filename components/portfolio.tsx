@@ -153,13 +153,13 @@ export function Portfolio() {
               {visibleItems.map((item) => (
                 <div
                   key={item.id}
-                  className="overflow-hidden relative rounded-lg cursor-pointer group aspect-auto"
+                  className="overflow-hidden relative rounded-lg cursor-pointer group aspect-3/4"
                   onClick={() => setSelectedPhoto(item)}
                 >
                   <img
                     src={item.url || "/placeholder.svg"}
                     alt={item.title}
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="flex absolute inset-0 justify-center items-center transition-all duration-300 bg-foreground/0 group-hover:bg-foreground/40">
                   </div>
