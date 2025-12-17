@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 
 // YouTube URL에서 Video ID 추출하는 유틸 함수
 function extractYouTubeId(url: string): string | null {
@@ -194,10 +195,13 @@ export function Portfolio() {
                     }}
                     onClick={() => setSelectedPhoto(item)}
                   >
-                    <img
+                    <Image
                       src={item.url || "/placeholder.svg"}
                       alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 768px) 50vw, 20vw"
+                      loading={index < maxVisibleItems ? "eager" : "lazy"}
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="flex absolute inset-0 justify-center items-center transition-all duration-300 bg-foreground/0 group-hover:bg-foreground/40">
                     </div>
@@ -245,9 +249,12 @@ export function Portfolio() {
                     className="overflow-hidden relative rounded-lg cursor-pointer group aspect-video"
                     onClick={() => videoId && setSelectedVideo(videoId)}
                   >
-                    <img
+                    <Image
                       src={thumbnail}
                       alt={video.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      loading="lazy"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     {/* 재생 버튼 오버레이 */}

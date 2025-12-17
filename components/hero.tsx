@@ -1,6 +1,7 @@
 "use client"
 
 import { use, useState, useEffect, useRef } from "react"
+import Image from "next/image"
 
 type HeroItem = { image: string }
 const FALLBACK_IMAGE = "/elegant-photography-studio-interior-with-soft-natu.jpg"
@@ -65,20 +66,36 @@ export function Hero({ heroItems }: { heroItems: Promise<HeroItem[]> }) {
   return (
     <section className="flex overflow-hidden relative justify-center items-center h-screen">
       <div className="overflow-hidden absolute inset-0">
-        {/* 레이어 A */}
+        {/* 레이어 A - 첫 번째 이미지는 priority로 preload */}
         <div
-          className={`absolute inset-0 bg-center bg-cover bg-no-repeat transition-opacity duration-900 ease-in-out ${
+          className={`absolute inset-0 transition-opacity duration-900 ease-in-out ${
             showA ? "opacity-100" : "opacity-0"
           }`}
-          style={{ backgroundImage: `url(${imageA})` }}
-        />
+        >
+          <Image
+            src={imageA}
+            alt="Bonobo Studio 히어로 이미지"
+            fill
+            priority={indexA === 0}
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
         {/* 레이어 B */}
         <div
-          className={`absolute inset-0 bg-center bg-cover bg-no-repeat transition-opacity duration-900 ease-in-out ${
+          className={`absolute inset-0 transition-opacity duration-900 ease-in-out ${
             showA ? "opacity-0" : "opacity-100"
           }`}
-          style={{ backgroundImage: `url(${imageB})` }}
-        />
+        >
+          <Image
+            src={imageB}
+            alt="Bonobo Studio 히어로 이미지"
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+        {/* 오버레이 */}
         <div className="absolute inset-0 bg-black/70" />
       </div>
 
