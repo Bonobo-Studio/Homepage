@@ -6,10 +6,10 @@ import { Menu, X } from "lucide-react"
 
 export function Header() {
   const navItems = [
-    { name: "후쿠오카 스냅촬영", href: "#wedding" },
-    { name: "프라이빗 투어", href: "#profile" },
-    { name: "포트폴리오", href: "#portfolio" },
-    { name: "촬영 및 투어 문의", href: "#contact" },
+    { name: "후쿠오카 스냅촬영", href: "/services/snap-photography" },
+    { name: "프라이빗 투어", href: "/services/private-tour" },
+    { name: "포트폴리오", href: "/#portfolio" },
+    { name: "촬영 및 투어 문의", href: "/#contact" },
   ]  
 
   const [isOpen, setIsOpen] = useState(false)

@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import Image from "next/image"
+import { useState, useEffect, useRef } from "react"
 
 // YouTube URL에서 Video ID 추출하는 유틸 함수
 function extractYouTubeId(url: string): string | null {
@@ -42,7 +41,9 @@ export function Portfolio() {
   const [activeCategory, setActiveCategory] = useState("photo")
   const [photoItems, setPhotoItems] = useState<PhotoItem[]>([])
   const [displayStartIndex, setDisplayStartIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
   const maxVisibleItems = 5
+  const sliderRef = useRef<HTMLDivElement>(null)
 
   // 사진 모달용 상태 추가
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null)
@@ -50,17 +51,10 @@ export function Portfolio() {
   const [videoItems, setVideoItems] = useState<VideoItem[]>([])
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
 
-  // 보여줄 아이템 계산 (순환)
-  const visibleItems = useMemo(() => {
-    if (photoItems.length <= maxVisibleItems) return photoItems
-    const items: typeof photoItems = []
-    for (let i = 0; i < maxVisibleItems; i += 1) {
-      // 배열 끝에 닿으면 앞에서 다시 가져오기
-      const wrappedIndex = (displayStartIndex + i) % photoItems.length
-      items.push(photoItems[wrappedIndex])
-    }
-    return items
-  }, [photoItems, displayStartIndex])
+  // 무한 루프를 위해 끝에 복제된 아이템 추가
+  const extendedPhotoItems = photoItems.length > maxVisibleItems
+    ? [...photoItems, ...photoItems.slice(0, maxVisibleItems)]
+    : photoItems
 
   // 사진 데이터 로드
   useEffect(() => {
@@ -94,29 +88,63 @@ export function Portfolio() {
     loadVideos()
   }, [])
 
-  // 자동 스크롤 useEffect 추가
+  // 자동 스크롤 (1장씩 전진, 무한 루프)
   useEffect(() => {
     if (activeCategory !== "photo") return
     if (photoItems.length <= maxVisibleItems) return
 
     const intervalId = window.setInterval(() => {
-      setDisplayStartIndex((prev) => (prev + maxVisibleItems) % photoItems.length)
+      setDisplayStartIndex((prev) => {
+        // 이미 끝에 도달했으면 대기 (리셋 진행 중)
+        if (prev >= photoItems.length) return prev
+        return prev + 1
+      })
     }, 4000)
     return () => window.clearInterval(intervalId)
   }, [photoItems, activeCategory])
 
-  // 버튼 핸들러
+  // 무한 루프 처리: 끝에 도달하면 애니메이션 없이 처음으로 점프
+  useEffect(() => {
+    if (displayStartIndex >= photoItems.length && photoItems.length > 0) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(false)
+        setDisplayStartIndex(0)
+      }, 700)
+      return () => clearTimeout(timeout)
+    }
+  }, [displayStartIndex, photoItems.length])
+
+  // 점프 후 트랜지션 다시 활성화
+  useEffect(() => {
+    if (!isTransitioning && displayStartIndex === 0) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(true)
+      }, 50)
+      return () => clearTimeout(timeout)
+    }
+  }, [isTransitioning, displayStartIndex])
+
+  // 버튼 핸들러 (1장씩 이동)
   const handlePrev = () => {
     if (photoItems.length === 0) return
     setDisplayStartIndex((prev) => {
-      const nextIndex = (prev - maxVisibleItems) % photoItems.length
-      return nextIndex < 0 ? nextIndex + photoItems.length : nextIndex
+      if (prev <= 0) {
+        // 처음에서 뒤로 가면 끝으로 점프 (애니메이션 없이)
+        setIsTransitioning(false)
+        setTimeout(() => setIsTransitioning(true), 50)
+        return photoItems.length - 1
+      }
+      return prev - 1
     })
   }
 
   const handleNext = () => {
     if (photoItems.length === 0) return
-    setDisplayStartIndex((prev) => (prev + maxVisibleItems) % photoItems.length)
+    // 이미 끝에 도달했으면 클릭 무시 (리셋 진행 중일 수 있음)
+    setDisplayStartIndex((prev) => {
+      if (prev >= photoItems.length) return prev
+      return prev + 1
+    })
   }
 
   return (
@@ -146,25 +174,36 @@ export function Portfolio() {
           ))}
         </div>
 
-        {/* 사진 갤러리 */}
+        {/* 사진 갤러리 - 무한 슬라이드 효과 */}
         {activeCategory == "photo" && (
           <div className="relative">
-            <div className="grid grid-rows-1 grid-flow-col auto-cols-[minmax(0,1fr)] gap-4 overflow-hidden">
-              {visibleItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="overflow-hidden relative rounded-lg cursor-pointer group aspect-auto"
-                  onClick={() => setSelectedPhoto(item)}
-                >
-                  <img
-                    src={item.url || "/placeholder.svg"}
-                    alt={item.title}
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="flex absolute inset-0 justify-center items-center transition-all duration-300 bg-foreground/0 group-hover:bg-foreground/40">
+            <div className="overflow-hidden">
+              <div
+                ref={sliderRef}
+                className={`flex gap-4 ${isTransitioning ? "transition-transform duration-700 ease-in-out" : ""}`}
+                style={{
+                  transform: `translateX(calc(-${displayStartIndex} * (100% + 1rem) / ${maxVisibleItems}))`,
+                }}
+              >
+                {extendedPhotoItems.map((item, index) => (
+                  <div
+                    key={`${item.id}-${index}`}
+                    className="overflow-hidden relative rounded-lg cursor-pointer group aspect-3/4 shrink-0"
+                    style={{
+                      width: `calc((100% - ${maxVisibleItems - 1}rem) / ${maxVisibleItems})`,
+                    }}
+                    onClick={() => setSelectedPhoto(item)}
+                  >
+                    <img
+                      src={item.url || "/placeholder.svg"}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="flex absolute inset-0 justify-center items-center transition-all duration-300 bg-foreground/0 group-hover:bg-foreground/40">
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             {photoItems.length > maxVisibleItems && (
               <div className="flex gap-3 justify-center items-center mt-4">
