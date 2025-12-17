@@ -1,7 +1,7 @@
-import { checkCacheAdminAuth, deleteCacheAdminAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Header from "@/components/admin/dashboard/header";
 import { AdminDashboardClient } from "./admin-dashboard-client";
+import { getSession } from "@/lib/session";
 
 type LogoutResult = {
   success: boolean
@@ -12,7 +12,8 @@ async function handleLogoutAction(): Promise<LogoutResult> {
   "use server"
 
   try {
-    await deleteCacheAdminAuth()
+    const session = await getSession()
+    session.destroy()
     return { success: true }
   } catch (error) {
     return { success: false, error: "로그아웃 중 오류가 발생했습니다" }
@@ -20,9 +21,9 @@ async function handleLogoutAction(): Promise<LogoutResult> {
 }
 
 export default async function AdminDashboard() {
-  const isAuth = await checkCacheAdminAuth()
+  const session = await getSession()
 
-  if (!isAuth) {
+  if (!session.isAdmin) {
     redirect("/admin");
   }
 

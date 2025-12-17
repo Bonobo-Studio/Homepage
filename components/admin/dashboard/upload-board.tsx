@@ -26,28 +26,34 @@ export default function UploadBoard({ onUploadSuccess }: { onUploadSuccess?: () 
             alert("파일과 카테고리를 모두 입력해주세요")
             return
         }
-
-        const form = new FormData()
-        form.append("file", newItem.file)
-        
-        const response = await fetch("/admin/dashboard/upload", {
-            method: "POST",
-            body: form,
-        })
-
-        if (!response.ok) {
-            throw new Error("업로드 중 오류가 발생했습니다")
+    
+        try {
+            const form = new FormData()
+            form.append("file", newItem.file)
+            
+            const response = await fetch("/admin/dashboard/upload", {
+                method: "POST",
+                body: form,
+            })
+    
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.error || "업로드 중 오류가 발생했습니다")
+            }
+    
+            // Reset form
+            setNewItem({ file: null })
+            setIsAdding(false)
+            if (fileInputRef.current) {
+              fileInputRef.current.value = ""
+            }
+    
+            // 갤러리 새로고침 콜백 호출
+            onUploadSuccess?.()
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다")
+            console.error("[upload] error:", error)
         }
-
-        // Reset form
-        setNewItem({ file: null })
-        setIsAdding(false)
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ""
-        }
-
-        // 갤러리 새로고침 콜백 호출
-        onUploadSuccess?.()
     }
 
     const handleRemoveImage = () => {

@@ -1,29 +1,15 @@
 "use server"
 
-import { cookies } from "next/headers";
-import { cache } from "react";
 import { NextResponse } from "next/server"
-
-export const checkCacheAdminAuth = cache(async () => {
-    const cookieStore = await cookies();
-    const adminAuth = cookieStore.get("admin_auth");
-    return adminAuth?.value === "true";
-});
-
-export const deleteCacheAdminAuth = async () => {
-    (await cookies()).delete("admin_auth");
-    return NextResponse.json({ ok: true });
-}
+import { getSession } from "./session";
 
 export const authAdmin = async (password: string) => {
     let adminPassword = process.env.ADMIN_PASSWORD;
 
     if(password === adminPassword) {
-        (await cookies()).set("admin_auth", "true", {
-            httpOnly: true,
-            secure: true,
-            maxAge: 60 * 60 * 24, // 1 day
-          });
+        const session = await getSession()
+        session.isAdmin = true;
+        await session.save();
 
         return NextResponse.json({ ok: true });
     }

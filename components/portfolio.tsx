@@ -158,6 +158,7 @@ export function Portfolio() {
                 >
                   <img
                     src={item.url || "/placeholder.svg"}
+                    alt={item.title}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="flex absolute inset-0 justify-center items-center transition-all duration-300 bg-foreground/0 group-hover:bg-foreground/40">
