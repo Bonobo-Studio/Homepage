@@ -24,7 +24,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-background/20 text-center">
-          <p className="text-sm text-background/40">© 2025 Bonobo Studio. All rights reserved.</p>
+          <p className="text-sm text-background/60">© 2025 Bonobo Studio. All rights reserved.</p>
         </div>
       </div>
     </footer>
