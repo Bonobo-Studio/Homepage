@@ -1,5 +1,6 @@
 import { AdminLogin } from "@/components/admin/admin-login"
-import { authAdmin, checkCacheAdminAuth } from "@/lib/auth"
+import { authAdmin } from "@/lib/auth"
+import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 async function handleLoginAction(password: string) {
@@ -7,7 +8,7 @@ async function handleLoginAction(password: string) {
 
   const response = await authAdmin(password);
 
-  if(response.ok) {
+  if (response.ok) {
     return { success: true, redirect: "/admin/dashboard" };
   } else {
     return { success: false, error: "비밀번호가 올바르지 않습니다" };
@@ -15,10 +16,10 @@ async function handleLoginAction(password: string) {
 }
 
 export default async function AdminLoginPage() {
-  const isAuth = await checkCacheAdminAuth();
+  const session = await getSession()
 
-  if(isAuth) {
-    redirect("/admin/dashboard");
+  if (session.isAdmin) {
+    redirect("/admin/dashboard")
   }
 
   return <AdminLogin handleLogin={handleLoginAction} />

@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { getSession } from "@/lib/session";
 
 export async function GET() {
     try {
+        const session = await getSession()
+        if (!session.isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { data, error } = await supabaseServer
             .from(process.env.DB_PHOTOS_TABLE!)
             .select("*")
